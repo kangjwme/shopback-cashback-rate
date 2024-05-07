@@ -1,7 +1,7 @@
 # Shopback TW 商家資訊
 使用 Python flask X bs4 X requests 做出來的小網站，可以讓人一眼看出目前有回饋的商家跟回饋比例。
 
-原網站：https://www.shopback.com.tw/all--stores，為什麼要做這個......可能是因為覺得爬蟲很有趣吧 XD
+原網站：[https://www.shopback.com.tw/all--stores](https://www.shopback.com.tw/all--stores)，為什麼要做這個......可能是因為覺得爬蟲很有趣吧 XD
 ## 程式預覽
 ![alt text](iShot_2024-05-07_10.07.41.png)
 ## 程式功能
