@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Shopback TW 商家回饋資訊</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <style>
+      th.sorted-asc::after {
+        content: " ▲";
+      }
+      th.sorted-desc::after {
+        content: " ▼";
+      }
+      .badge {
+        margin-left: 5px;
+        font-size: 1em; /* 調整 Badge 大小 */
+    }
+
+    /* 調整搜尋欄位寬度與表格同寬 */
+    #searchInput {
+      width: calc(100% - 20px); /* 總寬度減去兩側 padding */
+      margin-bottom: 10px; /* 添加底部間隔 */
+    }
+    </style>
+    <script>
+      var sortColumn = 1; // 初始化排序列為最高現金回饋
+      var sortDirection = "desc"; // 初始化排序方向為降序
+
+      function sortTable(n) {
+        var table, rows, switching, i, x, y, shouldSwitch, dir, switchcount = 0;
+        table = document.getElementById("merchant-table");
+        switching = true;
+        dir = sortDirection; // 使用當前的排序方向
+        while (switching) {
+          switching = false;
+          rows = table.rows;
+          for (i = 1; i < (rows.length - 1); i++) {
+            shouldSwitch = false;
+            x = rows[i].getElementsByTagName("TD")[n];
+            y = rows[i + 1].getElementsByTagName("TD")[n];
+            if (dir == "asc") {
+              if (parseFloat(x.getAttribute("data-value")) > parseFloat(y.getAttribute("data-value"))) {
+                shouldSwitch = true;
+                break;
+              }
+            } else if (dir == "desc") {
+              if (parseFloat(x.getAttribute("data-value")) < parseFloat(y.getAttribute("data-value"))) {
+                shouldSwitch = true;
+                break;
+              }
+            }
+          }
+          if (shouldSwitch) {
+            rows[i].parentNode.insertBefore(rows[i + 1], rows[i]);
+            switching = true;
+            switchcount ++;
+          } else {
+            if (switchcount == 0 && dir == "asc") {
+              dir = "desc";
+              switching = true;
+            }
+          }
+        }
+        // 根據當前的排序方向設置標題的類別
+        var headers = table.getElementsByTagName("TH");
+        for (var i = 0; i < headers.length; i++) {
+          headers[i].classList.remove("sorted-asc", "sorted-desc");
+        }
+        if (dir == "asc") {
+          headers[n].classList.add("sorted-asc");
+          sortDirection = "desc"; // 切換排序方向
+        } else {
+          headers[n].classList.add("sorted-desc");
+          sortDirection = "asc"; // 切換排序方向
+        }
+        sortColumn = n; // 記錄當前排序列
+      }
+      function filterMerchants() {
+        var input, filter, table, tr, td, i, txtValue;
+        input = document.getElementById("searchInput");
+        filter = input.value.toUpperCase();
+        table = document.getElementById("merchant-table");
+        tr = table.getElementsByTagName("tr");
+        for (i = 0; i < tr.length; i++) {
+          td = tr[i].getElementsByTagName("td")[0];
+          if (td) {
+            txtValue = td.textContent || td.innerText;
+            if (txtValue.toUpperCase().indexOf(filter) > -1) {
+              tr[i].style.display = "";
+            } else {
+              tr[i].style.display = "none";
+            }
+          }
+        }
+      }
+    </script>
+  </head>
+  <body>
+    <div class="container">
+      <h1 style="text-align: center;">Shopback TW 商家回饋資訊</h1>
+      <p style="text-align: center;">更新時間: {{ update_time }}</p>  <!-- 顯示更新時間 -->
+      <input type="text" id="searchInput" onkeyup="filterMerchants()" placeholder="搜尋商家...">
+      <table id="merchant-table" class="table table-striped">
+        <thead>
+          <tr>
+            <th onclick="sortTable(0)">商家名稱</th>
+            <th onclick="sortTable(1)">最高現金回饋</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for merchant in cashback_list %}
+          <tr>
+            <td data-value="{{ merchant.name }}">
+              <img src="{{ merchant.logo_url }}" alt="{{ merchant.name }}" class="merchant-logo" style="max-height:100px;max-width:60px;height:auto;width:auto;">
+              {% if "限時" in merchant.cashback_rate_text %}
+                <span class="badge badge-danger">限時</span>
+              {% endif %}
+              <a href="{{ merchant.link }}" target="_blank">{{ merchant.name }}</a>  <!-- 商家名稱連結 -->
+            </td>
+            <td data-value="{{ merchant.cashback_rate / 100 }}">{{ merchant.cashback_rate_text }}</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+      <p style="text-align: center;">資料來源：<a href="https://www.shopback.com.tw/all--stores">https://www.shopback.com.tw/all--stores</a></p>
+    </div>
+  </body>
+</html>
